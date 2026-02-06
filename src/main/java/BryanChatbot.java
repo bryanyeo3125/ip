@@ -9,9 +9,11 @@ public class BryanChatbot {
     private static final String COMMAND_LIST = "list";
     private static final String COMMAND_MARK = "mark";
     private static final String COMMAND_UNMARK = "unmark";
+    private static final String COMMAND_TODO = "todo";
+    private static final String COMMAND_DEADLINE = "deadline";
+    private static final String COMMAND_EVENT = "event";
 
-    private static final String[] TASKS = new String[MAX_TASKS];
-    private static final boolean[] IS_DONE = new boolean[MAX_TASKS];
+    private static final Task[] TASKS = new Task[MAX_TASKS];
     private static int taskCount = 0;
 
     public static void main(String[] args) {
@@ -51,7 +53,22 @@ public class BryanChatbot {
             return;
         }
 
-        addTask(input);
+        if (isTodoCommand(input)) {
+            addTodo(input);
+            return;
+        }
+
+        if (isDeadlineCommand(input)) {
+            addDeadline(input);
+            return;
+        }
+
+        if (isEventCommand(input)) {
+            addEvent(input);
+            return;
+        }
+
+        printUnknownCommand();
     }
 
     private static void printGreeting() {
@@ -83,18 +100,89 @@ public class BryanChatbot {
         return input.startsWith(COMMAND_UNMARK + " ");
     }
 
-    private static void addTask(String task) {
+    private static boolean isTodoCommand(String input) {
+        return input.startsWith(COMMAND_TODO + " ");
+    }
+
+    private static boolean isDeadlineCommand(String input) {
+        return input.startsWith(COMMAND_DEADLINE + " ");
+    }
+
+    private static boolean isEventCommand(String input) {
+        return input.startsWith(COMMAND_EVENT + " ");
+    }
+
+    private static void addTodo(String input) {
+        String description = input.substring((COMMAND_TODO + " ").length()).trim();
+        if (description.isEmpty()) {
+            printInvalidTodo();
+            return;
+        }
+
+        addTask(new Todo(description));
+    }
+
+    private static void addDeadline(String input) {
+        String remainder = input.substring((COMMAND_DEADLINE + " ").length());
+        String[] parts = remainder.split(" /by ", 2);
+
+        if (parts.length < 2) {
+            printInvalidDeadline();
+            return;
+        }
+
+        String description = parts[0].trim();
+        String by = parts[1].trim();
+
+        if (description.isEmpty() || by.isEmpty()) {
+            printInvalidDeadline();
+            return;
+        }
+
+        addTask(new Deadline(description, by));
+    }
+
+    private static void addEvent(String input) {
+        String remainder = input.substring((COMMAND_EVENT + " ").length());
+
+        String[] fromSplit = remainder.split(" /from ", 2);
+        if (fromSplit.length < 2) {
+            printInvalidEvent();
+            return;
+        }
+
+        String description = fromSplit[0].trim();
+        String[] toSplit = fromSplit[1].split(" /to ", 2);
+
+        if (toSplit.length < 2) {
+            printInvalidEvent();
+            return;
+        }
+
+        String from = toSplit[0].trim();
+        String to = toSplit[1].trim();
+
+        if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
+            printInvalidEvent();
+            return;
+        }
+
+        addTask(new Event(description, from, to));
+    }
+
+    private static void addTask(Task task) {
         if (taskCount >= MAX_TASKS) {
             printTaskLimitReached();
             return;
         }
 
         TASKS[taskCount] = task;
-        IS_DONE[taskCount] = false;
         taskCount++;
 
         System.out.println(LINE);
-        System.out.println("added: " + task);
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        System.out.println("Now you have " + taskCount + " tasks in the list.");
         System.out.println(LINE);
     }
 
@@ -103,16 +191,10 @@ public class BryanChatbot {
         System.out.println("Here are the tasks in your list:");
 
         for (int i = 0; i < taskCount; i++) {
-            System.out.println(formatTaskLine(i));
+            System.out.println((i + 1) + "." + TASKS[i]);
         }
 
         System.out.println(LINE);
-    }
-
-    private static String formatTaskLine(int index) {
-        int displayNumber = index + 1;
-        String status = IS_DONE[index] ? "X" : " ";
-        return displayNumber + ".[" + status + "] " + TASKS[index];
     }
 
     private static void markTask(int index) {
@@ -121,11 +203,12 @@ public class BryanChatbot {
             return;
         }
 
-        IS_DONE[index] = true;
+        Task task = TASKS[index];
+        task.markDone();
 
         System.out.println(LINE);
         System.out.println("Nice! I've marked this task as done:");
-        System.out.println("[X] " + TASKS[index]);
+        System.out.println("  " + task);
         System.out.println(LINE);
     }
 
@@ -135,11 +218,12 @@ public class BryanChatbot {
             return;
         }
 
-        IS_DONE[index] = false;
+        Task task = TASKS[index];
+        task.markNotDone();
 
         System.out.println(LINE);
         System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println("[ ] " + TASKS[index]);
+        System.out.println("  " + task);
         System.out.println(LINE);
     }
 
@@ -163,5 +247,123 @@ public class BryanChatbot {
         System.out.println(LINE);
         System.out.println("Task limit reached. Cannot add more tasks.");
         System.out.println(LINE);
+    }
+
+    private static void printUnknownCommand() {
+        System.out.println(LINE);
+        System.out.println("I don't understand that command yet.");
+        System.out.println(LINE);
+    }
+
+    private static void printInvalidTodo() {
+        System.out.println(LINE);
+        System.out.println("The description of a todo cannot be empty.");
+        System.out.println(LINE);
+    }
+
+    private static void printInvalidDeadline() {
+        System.out.println(LINE);
+        System.out.println("Usage: deadline <description> /by <when>");
+        System.out.println(LINE);
+    }
+
+    private static void printInvalidEvent() {
+        System.out.println(LINE);
+        System.out.println("Usage: event <description> /from <start> /to <end>");
+        System.out.println(LINE);
+    }
+}
+
+/* ---------- A-Inheritance Task Hierarchy ---------- */
+
+abstract class Task {
+
+    private final String description;
+    private boolean isDone;
+
+    protected Task(String description) {
+        this.description = description;
+        this.isDone = false;
+    }
+
+    public void markDone() {
+        this.isDone = true;
+    }
+
+    public void markNotDone() {
+        this.isDone = false;
+    }
+
+    protected String getStatusIcon() {
+        return this.isDone ? "X" : " ";
+    }
+
+    protected String getDescription() {
+        return this.description;
+    }
+
+    protected abstract String getTypeIcon();
+
+    protected String getDetails() {
+        return "";
+    }
+
+    @Override
+    public String toString() {
+        return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + getDescription() + getDetails();
+    }
+}
+
+class Todo extends Task {
+
+    public Todo(String description) {
+        super(description);
+    }
+
+    @Override
+    protected String getTypeIcon() {
+        return "T";
+    }
+}
+
+class Deadline extends Task {
+
+    private final String by;
+
+    public Deadline(String description, String by) {
+        super(description);
+        this.by = by;
+    }
+
+    @Override
+    protected String getTypeIcon() {
+        return "D";
+    }
+
+    @Override
+    protected String getDetails() {
+        return " (by: " + by + ")";
+    }
+}
+
+class Event extends Task {
+
+    private final String from;
+    private final String to;
+
+    public Event(String description, String from, String to) {
+        super(description);
+        this.from = from;
+        this.to = to;
+    }
+
+    @Override
+    protected String getTypeIcon() {
+        return "E";
+    }
+
+    @Override
+    protected String getDetails() {
+        return " (from: " + from + " to: " + to + ")";
     }
 }
