@@ -22,20 +22,24 @@ public class BryanChatbot {
         printGreeting();
 
         while (true) {
-            String input = scanner.nextLine();
+            String input = scanner.nextLine().trim();
 
             if (isBye(input)) {
                 printGoodbye();
                 break;
             }
 
-            handleCommand(input);
+            try {
+                handleCommand(input);
+            } catch (ChatbotException e) {
+                printError(e.getMessage());
+            }
         }
 
         scanner.close();
     }
 
-    private static void handleCommand(String input) {
+    private static void handleCommand(String input) throws ChatbotException {
         if (isList(input)) {
             printList();
             return;
@@ -68,7 +72,7 @@ public class BryanChatbot {
             return;
         }
 
-        printUnknownCommand();
+        throw new ChatbotException("I don't understand that command yet.");
     }
 
     private static void printGreeting() {
@@ -84,6 +88,12 @@ public class BryanChatbot {
         System.out.println(LINE);
     }
 
+    private static void printError(String message) {
+        System.out.println(LINE);
+        System.out.println(message);
+        System.out.println(LINE);
+    }
+
     private static boolean isBye(String input) {
         return input.equals(COMMAND_BYE);
     }
@@ -93,87 +103,80 @@ public class BryanChatbot {
     }
 
     private static boolean isMarkCommand(String input) {
-        return input.startsWith(COMMAND_MARK + " ");
+        return input.startsWith(COMMAND_MARK);
     }
 
     private static boolean isUnmarkCommand(String input) {
-        return input.startsWith(COMMAND_UNMARK + " ");
+        return input.startsWith(COMMAND_UNMARK);
     }
 
     private static boolean isTodoCommand(String input) {
-        return input.startsWith(COMMAND_TODO + " ");
+        return input.startsWith(COMMAND_TODO);
     }
 
     private static boolean isDeadlineCommand(String input) {
-        return input.startsWith(COMMAND_DEADLINE + " ");
+        return input.startsWith(COMMAND_DEADLINE);
     }
 
     private static boolean isEventCommand(String input) {
-        return input.startsWith(COMMAND_EVENT + " ");
+        return input.startsWith(COMMAND_EVENT);
     }
 
-    private static void addTodo(String input) {
-        String description = input.substring((COMMAND_TODO + " ").length()).trim();
+    private static void addTodo(String input) throws ChatbotException {
+        String description = extractAfterKeyword(input, COMMAND_TODO);
         if (description.isEmpty()) {
-            printInvalidTodo();
-            return;
+            throw new ChatbotException("The description of a todo cannot be empty.");
         }
 
         addTask(new Todo(description));
     }
 
-    private static void addDeadline(String input) {
-        String remainder = input.substring((COMMAND_DEADLINE + " ").length());
+    private static void addDeadline(String input) throws ChatbotException {
+        String remainder = extractAfterKeyword(input, COMMAND_DEADLINE);
         String[] parts = remainder.split(" /by ", 2);
 
         if (parts.length < 2) {
-            printInvalidDeadline();
-            return;
+            throw new ChatbotException("Usage: deadline <description> /by <when>");
         }
 
         String description = parts[0].trim();
         String by = parts[1].trim();
 
         if (description.isEmpty() || by.isEmpty()) {
-            printInvalidDeadline();
-            return;
+            throw new ChatbotException("Usage: deadline <description> /by <when>");
         }
 
         addTask(new Deadline(description, by));
     }
 
-    private static void addEvent(String input) {
-        String remainder = input.substring((COMMAND_EVENT + " ").length());
+    private static void addEvent(String input) throws ChatbotException {
+        String remainder = extractAfterKeyword(input, COMMAND_EVENT);
 
         String[] fromSplit = remainder.split(" /from ", 2);
         if (fromSplit.length < 2) {
-            printInvalidEvent();
-            return;
+            throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
         }
 
         String description = fromSplit[0].trim();
         String[] toSplit = fromSplit[1].split(" /to ", 2);
 
         if (toSplit.length < 2) {
-            printInvalidEvent();
-            return;
+            throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
         }
 
         String from = toSplit[0].trim();
         String to = toSplit[1].trim();
 
         if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
-            printInvalidEvent();
-            return;
+            throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
         }
 
         addTask(new Event(description, from, to));
     }
 
-    private static void addTask(Task task) {
+    private static void addTask(Task task) throws ChatbotException {
         if (taskCount >= MAX_TASKS) {
-            printTaskLimitReached();
-            return;
+            throw new ChatbotException("Task limit reached. Cannot add more tasks.");
         }
 
         TASKS[taskCount] = task;
@@ -198,11 +201,6 @@ public class BryanChatbot {
     }
 
     private static void markTask(int index) {
-        if (!isValidIndex(index)) {
-            printInvalidIndex();
-            return;
-        }
-
         Task task = TASKS[index];
         task.markDone();
 
@@ -213,11 +211,6 @@ public class BryanChatbot {
     }
 
     private static void unmarkTask(int index) {
-        if (!isValidIndex(index)) {
-            printInvalidIndex();
-            return;
-        }
-
         Task task = TASKS[index];
         task.markNotDone();
 
@@ -227,50 +220,47 @@ public class BryanChatbot {
         System.out.println(LINE);
     }
 
-    private static int parseIndex(String input) {
-        String[] parts = input.split(" ");
-        int oneBasedIndex = Integer.parseInt(parts[1]);
-        return oneBasedIndex - 1;
+    private static int parseIndex(String input) throws ChatbotException {
+        String[] parts = input.trim().split("\\s+");
+        if (parts.length < 2) {
+            throw new ChatbotException("Please specify a task number.");
+        }
+
+        int oneBasedIndex;
+        try {
+            oneBasedIndex = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            throw new ChatbotException("Please enter a valid task number.");
+        }
+
+        int index = oneBasedIndex - 1;
+        if (!isValidIndex(index)) {
+            throw new ChatbotException("That task number is out of range.");
+        }
+        return index;
     }
 
     private static boolean isValidIndex(int index) {
         return index >= 0 && index < taskCount;
     }
 
-    private static void printInvalidIndex() {
-        System.out.println(LINE);
-        System.out.println("Invalid task number.");
-        System.out.println(LINE);
+    private static String extractAfterKeyword(String input, String keyword) {
+        if (input.equals(keyword)) {
+            return "";
+        }
+        String prefix = keyword + " ";
+        if (input.startsWith(prefix)) {
+            return input.substring(prefix.length()).trim();
+        }
+        return "";
     }
+}
 
-    private static void printTaskLimitReached() {
-        System.out.println(LINE);
-        System.out.println("Task limit reached. Cannot add more tasks.");
-        System.out.println(LINE);
-    }
+/* ---------- A-Exceptions ---------- */
 
-    private static void printUnknownCommand() {
-        System.out.println(LINE);
-        System.out.println("I don't understand that command yet.");
-        System.out.println(LINE);
-    }
-
-    private static void printInvalidTodo() {
-        System.out.println(LINE);
-        System.out.println("The description of a todo cannot be empty.");
-        System.out.println(LINE);
-    }
-
-    private static void printInvalidDeadline() {
-        System.out.println(LINE);
-        System.out.println("Usage: deadline <description> /by <when>");
-        System.out.println(LINE);
-    }
-
-    private static void printInvalidEvent() {
-        System.out.println(LINE);
-        System.out.println("Usage: event <description> /from <start> /to <end>");
-        System.out.println(LINE);
+class ChatbotException extends Exception {
+    public ChatbotException(String message) {
+        super(message);
     }
 }
 
