@@ -1,3 +1,5 @@
+package duke;
+
 import java.util.Scanner;
 
 public class BryanChatbot {
@@ -176,7 +178,7 @@ public class BryanChatbot {
 
     private static void addTask(Task task) throws ChatbotException {
         if (taskCount >= MAX_TASKS) {
-            throw new ChatbotException("Task limit reached. Cannot add more tasks.");
+            throw new ChatbotException("duke.Task limit reached. Cannot add more tasks.");
         }
 
         TASKS[taskCount] = task;
@@ -264,7 +266,7 @@ class ChatbotException extends Exception {
     }
 }
 
-/* ---------- A-Inheritance Task Hierarchy ---------- */
+/* ---------- A-Inheritance duke.Task Hierarchy ---------- */
 
 abstract class Task {
 
