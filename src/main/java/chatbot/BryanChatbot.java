@@ -1,4 +1,4 @@
-package duke;
+package chatbot;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,35 +59,35 @@ public class BryanChatbot {
             return;
         }
 
-        if (isMarkCommand(input)) {
+        if (isCommand(input, COMMAND_MARK)) {
             int index = parseIndex(input);
             markTask(index);
             return;
         }
 
-        if (isUnmarkCommand(input)) {
+        if (isCommand(input, COMMAND_UNMARK)) {
             int index = parseIndex(input);
             unmarkTask(index);
             return;
         }
 
-        if (isDeleteCommand(input)) {
+        if (isCommand(input, COMMAND_DELETE)) {
             int index = parseIndex(input);
             deleteTask(index);
             return;
         }
 
-        if (isTodoCommand(input)) {
+        if (isCommand(input, COMMAND_TODO)) {
             addTodo(input);
             return;
         }
 
-        if (isDeadlineCommand(input)) {
+        if (isCommand(input, COMMAND_DEADLINE)) {
             addDeadline(input);
             return;
         }
 
-        if (isEventCommand(input)) {
+        if (isCommand(input, COMMAND_EVENT)) {
             addEvent(input);
             return;
         }
@@ -96,21 +96,25 @@ public class BryanChatbot {
     }
 
     private static void printGreeting() {
-        System.out.println(LINE);
-        System.out.println("Hello! I am bryan_chatbot.");
-        System.out.println("What can I do for you?");
-        System.out.println(LINE);
+        printBlock(
+                "Hello! I am bryan_chatbot.",
+                "What can I do for you?"
+        );
     }
 
     private static void printGoodbye() {
-        System.out.println(LINE);
-        System.out.println("Bye. Hope to see you again soon!");
-        System.out.println(LINE);
+        printBlock("Bye. Hope to see you again soon!");
     }
 
     private static void printError(String message) {
+        printBlock(message);
+    }
+
+    private static void printBlock(String... lines) {
         System.out.println(LINE);
-        System.out.println(message);
+        for (String line : lines) {
+            System.out.println(line);
+        }
         System.out.println(LINE);
     }
 
@@ -122,28 +126,8 @@ public class BryanChatbot {
         return input.equals(COMMAND_LIST);
     }
 
-    private static boolean isMarkCommand(String input) {
-        return input.equals(COMMAND_MARK) || input.startsWith(COMMAND_MARK + " ");
-    }
-
-    private static boolean isUnmarkCommand(String input) {
-        return input.equals(COMMAND_UNMARK) || input.startsWith(COMMAND_UNMARK + " ");
-    }
-
-    private static boolean isDeleteCommand(String input) {
-        return input.equals(COMMAND_DELETE) || input.startsWith(COMMAND_DELETE + " ");
-    }
-
-    private static boolean isTodoCommand(String input) {
-        return input.equals(COMMAND_TODO) || input.startsWith(COMMAND_TODO + " ");
-    }
-
-    private static boolean isDeadlineCommand(String input) {
-        return input.equals(COMMAND_DEADLINE) || input.startsWith(COMMAND_DEADLINE + " ");
-    }
-
-    private static boolean isEventCommand(String input) {
-        return input.equals(COMMAND_EVENT) || input.startsWith(COMMAND_EVENT + " ");
+    private static boolean isCommand(String input, String command) {
+        return input.equals(command) || input.startsWith(command + " ");
     }
 
     private static void addTodo(String input) throws ChatbotException {
@@ -175,21 +159,21 @@ public class BryanChatbot {
 
     private static void addEvent(String input) throws ChatbotException {
         String remainder = extractAfterKeyword(input, COMMAND_EVENT);
+        String[] fromParts = remainder.split(" /from ", 2);
 
-        String[] fromSplit = remainder.split(" /from ", 2);
-        if (fromSplit.length < 2) {
+        if (fromParts.length < 2) {
             throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
         }
 
-        String description = fromSplit[0].trim();
-        String[] toSplit = fromSplit[1].split(" /to ", 2);
+        String description = fromParts[0].trim();
+        String[] toParts = fromParts[1].split(" /to ", 2);
 
-        if (toSplit.length < 2) {
+        if (toParts.length < 2) {
             throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
         }
 
-        String from = toSplit[0].trim();
-        String to = toSplit[1].trim();
+        String from = toParts[0].trim();
+        String to = toParts[1].trim();
 
         if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new ChatbotException("Usage: event <description> /from <start> /to <end>");
@@ -206,11 +190,11 @@ public class BryanChatbot {
         tasks.add(task);
         saveTasks();
 
-        System.out.println(LINE);
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-        System.out.println(LINE);
+        printBlock(
+                "Got it. I've added this task:",
+                "  " + task,
+                "Now you have " + tasks.size() + " tasks in the list."
+        );
     }
 
     private static void printList() {
@@ -229,10 +213,10 @@ public class BryanChatbot {
         task.markDone();
         saveTasks();
 
-        System.out.println(LINE);
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println("  " + task);
-        System.out.println(LINE);
+        printBlock(
+                "Nice! I've marked this task as done:",
+                "  " + task
+        );
     }
 
     private static void unmarkTask(int index) throws ChatbotException {
@@ -240,21 +224,21 @@ public class BryanChatbot {
         task.markNotDone();
         saveTasks();
 
-        System.out.println(LINE);
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println("  " + task);
-        System.out.println(LINE);
+        printBlock(
+                "OK, I've marked this task as not done yet:",
+                "  " + task
+        );
     }
 
     private static void deleteTask(int index) throws ChatbotException {
-        Task removed = tasks.remove(index);
+        Task removedTask = tasks.remove(index);
         saveTasks();
 
-        System.out.println(LINE);
-        System.out.println("Noted. I've removed this task:");
-        System.out.println("  " + removed);
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-        System.out.println(LINE);
+        printBlock(
+                "Noted. I've removed this task:",
+                "  " + removedTask,
+                "Now you have " + tasks.size() + " tasks in the list."
+        );
     }
 
     private static int parseIndex(String input) throws ChatbotException {
@@ -270,11 +254,12 @@ public class BryanChatbot {
             throw new ChatbotException("Please enter a valid task number.");
         }
 
-        int index = oneBasedIndex - 1;
-        if (!isValidIndex(index)) {
+        int zeroBasedIndex = oneBasedIndex - 1;
+        if (!isValidIndex(zeroBasedIndex)) {
             throw new ChatbotException("That task number is out of range.");
         }
-        return index;
+
+        return zeroBasedIndex;
     }
 
     private static boolean isValidIndex(int index) {
@@ -282,19 +267,16 @@ public class BryanChatbot {
     }
 
     private static String extractAfterKeyword(String input, String keyword) {
-        if (input.equals(keyword)) {
+        String prefix = keyword + " ";
+        if (!input.startsWith(prefix)) {
             return "";
         }
-        String prefix = keyword + " ";
-        if (input.startsWith(prefix)) {
-            return input.substring(prefix.length()).trim();
-        }
-        return "";
+        return input.substring(prefix.length()).trim();
     }
 
     private static void loadTasks() {
         if (!Files.exists(DATA_FILE)) {
-            return; // first run: no data file yet
+            return;
         }
 
         try (BufferedReader reader = Files.newBufferedReader(DATA_FILE)) {
@@ -326,42 +308,42 @@ public class BryanChatbot {
     }
 
     private static Task parseTaskLine(String line) {
-        String trimmed = line.trim();
-        if (trimmed.isEmpty()) {
+        String trimmedLine = line.trim();
+        if (trimmedLine.isEmpty()) {
             return null;
         }
 
-        String[] parts = trimmed.split("\\s*\\|\\s*");
-        if (parts.length < 3) {
+        String[] fields = trimmedLine.split("\\s*\\|\\s*");
+        if (fields.length < 3) {
             return null;
         }
 
-        String type = parts[0];
-        boolean done = "1".equals(parts[1]);
-        String description = parts[2];
+        String taskType = fields[0];
+        boolean isTaskDone = "1".equals(fields[1]);
+        String description = fields[2];
 
         Task task;
-        switch (type) {
+        switch (taskType) {
         case "T":
             task = new Todo(description);
             break;
         case "D":
-            if (parts.length < 4) {
+            if (fields.length < 4) {
                 return null;
             }
-            task = new Deadline(description, parts[3]);
+            task = new Deadline(description, fields[3]);
             break;
         case "E":
-            if (parts.length < 5) {
+            if (fields.length < 5) {
                 return null;
             }
-            task = new Event(description, parts[3], parts[4]);
+            task = new Event(description, fields[3], fields[4]);
             break;
         default:
             return null;
         }
 
-        if (done) {
+        if (isTaskDone) {
             task.markDone();
         }
 
@@ -369,15 +351,11 @@ public class BryanChatbot {
     }
 }
 
-/* ---------- A-Exceptions ---------- */
-
 class ChatbotException extends Exception {
     public ChatbotException(String message) {
         super(message);
     }
 }
-
-/* ---------- A-Inheritance Task Hierarchy ---------- */
 
 abstract class Task {
 
