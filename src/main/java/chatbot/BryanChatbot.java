@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class BryanChatbot {
 
@@ -148,17 +150,22 @@ public class BryanChatbot {
         String[] parts = remainder.split(" /by ", 2);
 
         if (parts.length < 2) {
-            throw new ChatbotException("Usage: deadline <description> /by <when>");
+            throw new ChatbotException("Usage: deadline <description> /by <yyyy-MM-dd>");
         }
 
         String description = parts[0].trim();
-        String by = parts[1].trim();
+        String byText = parts[1].trim();
 
-        if (description.isEmpty() || by.isEmpty()) {
-            throw new ChatbotException("Usage: deadline <description> /by <when>");
+        if (description.isEmpty() || byText.isEmpty()) {
+            throw new ChatbotException("Usage: deadline <description> /by <yyyy-MM-dd>");
         }
 
-        addTask(new Deadline(description, by));
+        try {
+            LocalDate byDate = LocalDate.parse(byText);
+            addTask(new Deadline(description, byDate));
+        } catch (DateTimeParseException e) {
+            throw new ChatbotException("Please enter the deadline in yyyy-MM-dd format.");
+        }
     }
 
     private static void addEvent(String input) throws ChatbotException {
@@ -334,7 +341,11 @@ public class BryanChatbot {
             if (fields.length < 4) {
                 return null;
             }
-            task = new Deadline(description, fields[3]);
+            try {
+                task = new Deadline(description, LocalDate.parse(fields[3]));
+            } catch (DateTimeParseException e) {
+                return null;
+            }
             break;
         case "E":
             if (fields.length < 5) {

@@ -1,10 +1,16 @@
 package chatbot;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 class Deadline extends Task {
 
-    private final String by;
+    private static final DateTimeFormatter OUTPUT_FORMAT =
+            DateTimeFormatter.ofPattern("MMM d yyyy");
 
-    public Deadline(String description, String by) {
+    private final LocalDate by;
+
+    public Deadline(String description, LocalDate by) {
         super(description);
         this.by = by;
     }
@@ -16,7 +22,7 @@ class Deadline extends Task {
 
     @Override
     protected String getDetails() {
-        return " (by: " + by + ")";
+        return " (by: " + by.format(OUTPUT_FORMAT) + ")";
     }
 
     @Override
