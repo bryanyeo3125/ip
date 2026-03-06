@@ -25,7 +25,7 @@ public class BryanChatbot {
     private static final String COMMAND_EVENT = "event";
 
     private static final Path DATA_DIR = Paths.get("data");
-    private static final Path DATA_FILE = DATA_DIR.resolve("duke.txt");
+    private static final Path DATA_FILE = DATA_DIR.resolve("chatbot.txt");
 
     private static final List<Task> tasks = new ArrayList<>();
 
@@ -33,7 +33,12 @@ public class BryanChatbot {
         Scanner scanner = new Scanner(System.in);
 
         printGreeting();
-        loadTasks();
+
+        try {
+            loadTasks();
+        } catch (ChatbotException e) {
+            printError(e.getMessage());
+        }
 
         while (true) {
             String input = scanner.nextLine().trim();
@@ -274,7 +279,7 @@ public class BryanChatbot {
         return input.substring(prefix.length()).trim();
     }
 
-    private static void loadTasks() {
+    private static void loadTasks() throws ChatbotException {
         if (!Files.exists(DATA_FILE)) {
             return;
         }
@@ -288,7 +293,7 @@ public class BryanChatbot {
                 }
             }
         } catch (IOException e) {
-            printError("Warning: Could not load saved tasks.");
+            throw new ChatbotException("Warning: Could not load saved tasks.");
         }
     }
 
