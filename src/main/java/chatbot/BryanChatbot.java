@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -27,7 +26,7 @@ public class BryanChatbot {
     private static final Path DATA_DIR = Paths.get("data");
     private static final Path DATA_FILE = DATA_DIR.resolve("chatbot.txt");
 
-    private static final List<Task> tasks = new ArrayList<>();
+    private static final TaskList tasks = new TaskList();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -192,7 +191,7 @@ public class BryanChatbot {
             throw new ChatbotException("Task limit reached. Cannot add more tasks.");
         }
 
-        tasks.add(task);
+        tasks.addTask(task);
         saveTasks();
 
         printBlock(
@@ -207,15 +206,14 @@ public class BryanChatbot {
         System.out.println("Here are the tasks in your list:");
 
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+            System.out.println((i + 1) + "." + tasks.getTask(i));
         }
 
         System.out.println(LINE);
     }
 
     private static void markTask(int index) throws ChatbotException {
-        Task task = tasks.get(index);
-        task.markDone();
+        Task task = tasks.markTask(index);
         saveTasks();
 
         printBlock(
@@ -225,8 +223,7 @@ public class BryanChatbot {
     }
 
     private static void unmarkTask(int index) throws ChatbotException {
-        Task task = tasks.get(index);
-        task.markNotDone();
+        Task task = tasks.unmarkTask(index);
         saveTasks();
 
         printBlock(
@@ -236,7 +233,7 @@ public class BryanChatbot {
     }
 
     private static void deleteTask(int index) throws ChatbotException {
-        Task removedTask = tasks.remove(index);
+        Task removedTask = tasks.deleteTask(index);
         saveTasks();
 
         printBlock(
@@ -289,7 +286,7 @@ public class BryanChatbot {
             while ((line = reader.readLine()) != null) {
                 Task task = parseTaskLine(line);
                 if (task != null) {
-                    tasks.add(task);
+                    tasks.addTask(task);
                 }
             }
         } catch (IOException e) {
@@ -302,7 +299,8 @@ public class BryanChatbot {
             Files.createDirectories(DATA_DIR);
 
             try (BufferedWriter writer = Files.newBufferedWriter(DATA_FILE)) {
-                for (Task task : tasks) {
+                List<Task> allTasks = tasks.getAllTasks();
+                for (Task task : allTasks) {
                     writer.write(task.toStorageString());
                     writer.newLine();
                 }
@@ -353,121 +351,5 @@ public class BryanChatbot {
         }
 
         return task;
-    }
-}
-
-class ChatbotException extends Exception {
-    public ChatbotException(String message) {
-        super(message);
-    }
-}
-
-abstract class Task {
-
-    private final String description;
-    private boolean isDone;
-
-    protected Task(String description) {
-        this.description = description;
-        this.isDone = false;
-    }
-
-    public void markDone() {
-        this.isDone = true;
-    }
-
-    public void markNotDone() {
-        this.isDone = false;
-    }
-
-    protected boolean isDone() {
-        return this.isDone;
-    }
-
-    protected String getStatusIcon() {
-        return this.isDone ? "X" : " ";
-    }
-
-    protected String getDescription() {
-        return this.description;
-    }
-
-    protected abstract String getTypeIcon();
-
-    protected String getDetails() {
-        return "";
-    }
-
-    public String toStorageString() {
-        return getTypeIcon() + " | " + (isDone() ? "1" : "0") + " | " + getDescription();
-    }
-
-    @Override
-    public String toString() {
-        return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + getDescription() + getDetails();
-    }
-}
-
-class Todo extends Task {
-
-    public Todo(String description) {
-        super(description);
-    }
-
-    @Override
-    protected String getTypeIcon() {
-        return "T";
-    }
-}
-
-class Deadline extends Task {
-
-    private final String by;
-
-    public Deadline(String description, String by) {
-        super(description);
-        this.by = by;
-    }
-
-    @Override
-    protected String getTypeIcon() {
-        return "D";
-    }
-
-    @Override
-    protected String getDetails() {
-        return " (by: " + by + ")";
-    }
-
-    @Override
-    public String toStorageString() {
-        return super.toStorageString() + " | " + by;
-    }
-}
-
-class Event extends Task {
-
-    private final String from;
-    private final String to;
-
-    public Event(String description, String from, String to) {
-        super(description);
-        this.from = from;
-        this.to = to;
-    }
-
-    @Override
-    protected String getTypeIcon() {
-        return "E";
-    }
-
-    @Override
-    protected String getDetails() {
-        return " (from: " + from + " to: " + to + ")";
-    }
-
-    @Override
-    public String toStorageString() {
-        return super.toStorageString() + " | " + from + " | " + to;
     }
 }
