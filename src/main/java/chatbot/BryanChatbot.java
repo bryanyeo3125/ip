@@ -30,6 +30,8 @@ public class BryanChatbot {
 
     private static final TaskList tasks = new TaskList();
 
+    private static final String COMMAND_FIND = "find";
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -95,6 +97,11 @@ public class BryanChatbot {
 
         if (isCommand(input, COMMAND_EVENT)) {
             addEvent(input);
+            return;
+        }
+
+        if (isCommand(input, COMMAND_FIND)) {
+            findTasks(input);
             return;
         }
 
@@ -191,6 +198,23 @@ public class BryanChatbot {
         }
 
         addTask(new Event(description, from, to));
+    }
+
+    private static void findTasks(String input) throws ChatbotException {
+        String keyword = extractAfterKeyword(input, COMMAND_FIND);
+
+        if (keyword.isEmpty()) {
+            throw new ChatbotException("The keyword for find cannot be empty.");
+        }
+
+        List<Task> matchingTasks = tasks.findTasks(keyword);
+
+        System.out.println(LINE);
+        System.out.println("Here are the matching tasks in your list:");
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            System.out.println((i + 1) + "." + matchingTasks.get(i));
+        }
+        System.out.println(LINE);
     }
 
     private static void addTask(Task task) throws ChatbotException {

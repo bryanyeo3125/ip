@@ -40,6 +40,10 @@ abstract class Task {
         return getTypeIcon() + " | " + (isDone() ? "1" : "0") + " | " + getDescription();
     }
 
+    public boolean containsKeyword(String keyword) {
+        return getDescription().toLowerCase().contains(keyword.toLowerCase());
+    }
+
     @Override
     public String toString() {
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
