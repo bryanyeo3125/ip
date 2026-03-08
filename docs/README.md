@@ -24,8 +24,8 @@ Adds a simple task.
 
 Command: todo _DESCRIPTION_
 
-Example: todo read book
-Output: [T][] read book
+Example: todo read book  
+Output: [T][ ] read book
 
 ---
 
@@ -35,8 +35,8 @@ Adds a task with a deadline date.
 
 Command: deadline _DESCRIPTION_ /by _YYYY-MM-DD_
 
-Example: deadline submit report /by 2026-03-14
-Output: [D][] submit report (by: Mar 14 2026)
+Example: deadline submit report /by 2026-03-14  
+Output: [D][ ] submit report (by: Mar 14 2026)
 
 ---
 
@@ -46,8 +46,8 @@ Adds an event with a start and end time.
 
 Command: event _DESCRIPTION_ /from _START_ /to _END_
 
-Example: event CS2113 Lecture /from 4pm /to 6pm
-Output: [E][] CS2113 Lecture (from 4pm to: 6pm)
+Example: event CS2113 Lecture /from 4pm /to 6pm  
+Output: [E][ ] CS2113 Lecture (from 4pm to: 6pm)
 
 ---
 
@@ -57,10 +57,10 @@ Displays all tasks in your list.
 
 Command: list
 
-Example: list
-Output:
-1.[T][ ] read book
-2.[D][ ] submit report (by: Mar 14 2026)
+Example: list  
+Output:  
+1.[T][ ] read book  
+2.[D][ ] submit report (by: Mar 14 2026)  
 3.[E][ ] CS2113 Lecture (from: 4pm to: 6pm)
 
 ---
@@ -71,7 +71,7 @@ Marks a task as completed.
 
 Command: mark _INDEX_
 
-Example: mark 1
+Example: mark 1  
 Output: [T][X] read book
 
 ---
@@ -82,8 +82,8 @@ Marks a completed task as not done.
 
 Command: unmark _INDEX_
 
-Example: unmark 1
-Output: [T][] read book
+Example: unmark 1  
+Output: [T][ ] read book
 
 ---
 
@@ -93,7 +93,7 @@ Removes a task from the list.
 
 Command: delete _INDEX_
 
-Example: delete 1
+Example: delete 1  
 Output: Noted. I've removed this task.
 
 ---
@@ -106,7 +106,7 @@ Command: find _KEYWORD_
 
 Example: find book
 Output:
-1.[T][ ] read book
+1.[T][ ] read book  
 2.[D][ ] return book (by: Mar 10 2026)
 
 ---
@@ -117,7 +117,7 @@ Closes the program.
 
 Command: bye
 
-Example: bye
+Example: bye  
 Output: Bye. Hope to see you again soon!
 
 ---
