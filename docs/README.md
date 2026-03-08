@@ -11,7 +11,12 @@ You interact with BryanChatbot by typing commands in the terminal.
 1. Download the `.jar` file from the GitHub release page.
 2. Copy the `.jar` file into an empty folder.
 3. Open a terminal in that folder.
-4. Run the chatbot using the command: java -jar "ip.jar"
+4. Run the chatbot using:
+
+```
+java -jar "ip.jar"
+```
+
 5. Type commands to manage your tasks.
 
 ---
@@ -22,10 +27,23 @@ You interact with BryanChatbot by typing commands in the terminal.
 
 Adds a simple task.
 
-Command: todo _DESCRIPTION_
+Command:
 
-Example: todo read book  
-Output: [T][ ] read book
+```
+todo DESCRIPTION
+```
+
+Example:
+
+```
+todo read book
+```
+
+Output:
+
+```
+[T][ ] read book
+```
 
 ---
 
@@ -33,10 +51,23 @@ Output: [T][ ] read book
 
 Adds a task with a deadline date.
 
-Command: deadline _DESCRIPTION_ /by _YYYY-MM-DD_
+Command:
 
-Example: deadline submit report /by 2026-03-14  
-Output: [D][ ] submit report (by: Mar 14 2026)
+```
+deadline DESCRIPTION /by YYYY-MM-DD
+```
+
+Example:
+
+```
+deadline submit report /by 2026-03-14
+```
+
+Output:
+
+```
+[D][ ] submit report (by: Mar 14 2026)
+```
 
 ---
 
@@ -44,10 +75,23 @@ Output: [D][ ] submit report (by: Mar 14 2026)
 
 Adds an event with a start and end time.
 
-Command: event _DESCRIPTION_ /from _START_ /to _END_
+Command:
 
-Example: event CS2113 Lecture /from 4pm /to 6pm  
-Output: [E][ ] CS2113 Lecture (from 4pm to: 6pm)
+```
+event DESCRIPTION /from START /to END
+```
+
+Example:
+
+```
+event CS2113 Lecture /from 4pm /to 6pm
+```
+
+Output:
+
+```
+[E][ ] CS2113 Lecture (from: 4pm to: 6pm)
+```
 
 ---
 
@@ -55,13 +99,19 @@ Output: [E][ ] CS2113 Lecture (from 4pm to: 6pm)
 
 Displays all tasks in your list.
 
-Command: list
+Command:
 
-Example: list  
-Output:  
-1.[T][ ] read book  
-2.[D][ ] submit report (by: Mar 14 2026)  
+```
+list
+```
+
+Example output:
+
+```
+1.[T][ ] read book
+2.[D][ ] submit report (by: Mar 14 2026)
 3.[E][ ] CS2113 Lecture (from: 4pm to: 6pm)
+```
 
 ---
 
@@ -69,10 +119,23 @@ Output:
 
 Marks a task as completed.
 
-Command: mark _INDEX_
+Command:
 
-Example: mark 1  
-Output: [T][X] read book
+```
+mark INDEX
+```
+
+Example:
+
+```
+mark 1
+```
+
+Output:
+
+```
+[T][X] read book
+```
 
 ---
 
@@ -80,10 +143,23 @@ Output: [T][X] read book
 
 Marks a completed task as not done.
 
-Command: unmark _INDEX_
+Command:
 
-Example: unmark 1  
-Output: [T][ ] read book
+```
+unmark INDEX
+```
+
+Example:
+
+```
+unmark 1
+```
+
+Output:
+
+```
+[T][ ] read book
+```
 
 ---
 
@@ -91,10 +167,23 @@ Output: [T][ ] read book
 
 Removes a task from the list.
 
-Command: delete _INDEX_
+Command:
 
-Example: delete 1  
-Output: Noted. I've removed this task.
+```
+delete INDEX
+```
+
+Example:
+
+```
+delete 1
+```
+
+Output:
+
+```
+Noted. I've removed this task.
+```
 
 ---
 
@@ -102,12 +191,24 @@ Output: Noted. I've removed this task.
 
 Search for tasks containing a keyword.
 
-Command: find _KEYWORD_
+Command:
 
-Example: find book
+```
+find KEYWORD
+```
+
+Example:
+
+```
+find book
+```
+
 Output:
-1.[T][ ] read book  
+
+```
+1.[T][ ] read book
 2.[D][ ] return book (by: Mar 10 2026)
+```
 
 ---
 
@@ -115,10 +216,17 @@ Output:
 
 Closes the program.
 
-Command: bye
+Command:
 
-Example: bye  
-Output: Bye. Hope to see you again soon!
+```
+bye
+```
+
+Example output:
+
+```
+Bye. Hope to see you again soon!
+```
 
 ---
 
@@ -126,7 +234,11 @@ Output: Bye. Hope to see you again soon!
 
 BryanChatbot automatically saves your tasks to a file.
 
-The data file is stored in: data/chatbot.txt
+The data file is stored in:
+
+```
+data/chatbot.txt
+```
 
 Tasks are loaded automatically when the chatbot starts.
 
@@ -147,14 +259,3 @@ Tasks are loaded automatically when the chatbot starts.
 | `bye` | Exit the chatbot |
 
 ---
-
-
-
-
-
-
-
-
-
-
-
