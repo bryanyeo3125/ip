@@ -8,9 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
+/**
+ * BryanChatbot is a command-line chatbot that allows users to manage todos, deadlines, and events.
+ */
 public class BryanChatbot {
 
     private static final String LINE = "----------------------------------------";
@@ -30,8 +31,11 @@ public class BryanChatbot {
 
     private static final TaskList tasks = new TaskList();
 
-    private static final String COMMAND_FIND = "find";
-
+    /**
+     * Starts the chatbot application.
+     *
+     * @param args: Command-line arguments passed into the application.
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -61,6 +65,12 @@ public class BryanChatbot {
         scanner.close();
     }
 
+    /**
+     * Processes a user command, does the correct action.
+     *
+     * @param input: Full command entered by the user.
+     * @throws ChatbotException: If the command format is invalid/unsupported.
+     */
     private static void handleCommand(String input) throws ChatbotException {
         if (isList(input)) {
             printList();
@@ -100,14 +110,12 @@ public class BryanChatbot {
             return;
         }
 
-        if (isCommand(input, COMMAND_FIND)) {
-            findTasks(input);
-            return;
-        }
-
         throw new ChatbotException("I don't understand that command yet.");
     }
 
+    /**
+     * Prints the chatbot startup message shown when the program starts.
+     */
     private static void printGreeting() {
         printBlock(
                 "Hello! I am bryan_chatbot.",
@@ -115,14 +123,27 @@ public class BryanChatbot {
         );
     }
 
+    /**
+     * Prints the chatbot exit message shown before exiting.
+     */
     private static void printGoodbye() {
         printBlock("Bye. Hope to see you again soon!");
     }
 
+    /**
+     * Prints an error message.
+     *
+     * @param message: Error message to be shown.
+     */
     private static void printError(String message) {
         printBlock(message);
     }
 
+    /**
+     * Prints one or more lines.
+     *
+     * @param lines: Lines to be printed.
+     */
     private static void printBlock(String... lines) {
         System.out.println(LINE);
         for (String line : lines) {
@@ -131,18 +152,43 @@ public class BryanChatbot {
         System.out.println(LINE);
     }
 
+    /**
+     * Returns true if the user wants to exit.
+     *
+     * @param input: User input.
+     * @return True if the input is the bye command.
+     */
     private static boolean isBye(String input) {
         return input.equals(COMMAND_BYE);
     }
 
+    /**
+     * Returns true if the user wants to list all tasks.
+     *
+     * @param input: User input.
+     * @return True if the input is the list command.
+     */
     private static boolean isList(String input) {
         return input.equals(COMMAND_LIST);
     }
 
+    /**
+     * Returns true if the given input matches the command.
+     *
+     * @param input: Full user input.
+     * @param command: Command keyword to check.
+     * @return True if the input matches the command.
+     */
     private static boolean isCommand(String input, String command) {
         return input.equals(command) || input.startsWith(command + " ");
     }
 
+    /**
+     * Parses and adds a todo task.
+     *
+     * @param input: Full user input.
+     * @throws ChatbotException: If the todo description is empty.
+     */
     private static void addTodo(String input) throws ChatbotException {
         String description = extractAfterKeyword(input, COMMAND_TODO);
         if (description.isEmpty()) {
@@ -152,29 +198,36 @@ public class BryanChatbot {
         addTask(new Todo(description));
     }
 
+    /**
+     * Parses and adds a deadline task.
+     *
+     * @param input: Full user input.
+     * @throws ChatbotException: If the deadline format is invalid.
+     */
     private static void addDeadline(String input) throws ChatbotException {
         String remainder = extractAfterKeyword(input, COMMAND_DEADLINE);
         String[] parts = remainder.split(" /by ", 2);
 
         if (parts.length < 2) {
-            throw new ChatbotException("Usage: deadline <description> /by <yyyy-MM-dd>");
+            throw new ChatbotException("Usage: deadline <description> /by <when>");
         }
 
         String description = parts[0].trim();
-        String byText = parts[1].trim();
+        String by = parts[1].trim();
 
-        if (description.isEmpty() || byText.isEmpty()) {
-            throw new ChatbotException("Usage: deadline <description> /by <yyyy-MM-dd>");
+        if (description.isEmpty() || by.isEmpty()) {
+            throw new ChatbotException("Usage: deadline <description> /by <when>");
         }
 
-        try {
-            LocalDate byDate = LocalDate.parse(byText);
-            addTask(new Deadline(description, byDate));
-        } catch (DateTimeParseException e) {
-            throw new ChatbotException("Please enter the deadline in yyyy-MM-dd format.");
-        }
+        addTask(new Deadline(description, by));
     }
 
+    /**
+     * Parses and adds an event task.
+     *
+     * @param input: Full user input.
+     * @throws ChatbotException: If the event format is invalid.
+     */
     private static void addEvent(String input) throws ChatbotException {
         String remainder = extractAfterKeyword(input, COMMAND_EVENT);
         String[] fromParts = remainder.split(" /from ", 2);
@@ -200,6 +253,16 @@ public class BryanChatbot {
         addTask(new Event(description, from, to));
     }
 
+    /**
+     * Finds and displays tasks which descriptions contain a keyword.
+     *
+     * The keyword is extracted from the user's input after the "find" command.
+     * If the keyword is empty, a ChatbotException is thrown. Otherwise, the
+     * matching tasks are retrieved from the task list and displayed to the user.
+     *
+     * @param input: The command entered by the user.
+     * @throws ChatbotException: If the keyword is missing or empty.
+     */
     private static void findTasks(String input) throws ChatbotException {
         String keyword = extractAfterKeyword(input, COMMAND_FIND);
 
@@ -217,6 +280,12 @@ public class BryanChatbot {
         System.out.println(LINE);
     }
 
+    /**
+     * Adds a task to the list and saves the updated list.
+     *
+     * @param task: Task to be added.
+     * @throws ChatbotException: If the list is full or saving fails.
+     */
     private static void addTask(Task task) throws ChatbotException {
         if (tasks.size() >= MAX_TASKS) {
             throw new ChatbotException("Task limit reached. Cannot add more tasks.");
@@ -232,6 +301,9 @@ public class BryanChatbot {
         );
     }
 
+    /**
+     * Prints all tasks currently in the task list.
+     */
     private static void printList() {
         System.out.println(LINE);
         System.out.println("Here are the tasks in your list:");
@@ -243,6 +315,12 @@ public class BryanChatbot {
         System.out.println(LINE);
     }
 
+    /**
+     * Marks the task at the given index as done.
+     *
+     * @param index: Index of the task.
+     * @throws ChatbotException: If saving fails.
+     */
     private static void markTask(int index) throws ChatbotException {
         Task task = tasks.markTask(index);
         saveTasks();
@@ -253,6 +331,12 @@ public class BryanChatbot {
         );
     }
 
+    /**
+     * Marks the task at the given index as not done.
+     *
+     * @param index: Index of the task.
+     * @throws ChatbotException: If saving fails.
+     */
     private static void unmarkTask(int index) throws ChatbotException {
         Task task = tasks.unmarkTask(index);
         saveTasks();
@@ -263,6 +347,12 @@ public class BryanChatbot {
         );
     }
 
+    /**
+     * Deletes the task at the given index.
+     *
+     * @param index: Index of the task.
+     * @throws ChatbotException: If saving fails.
+     */
     private static void deleteTask(int index) throws ChatbotException {
         Task removedTask = tasks.deleteTask(index);
         saveTasks();
@@ -274,6 +364,13 @@ public class BryanChatbot {
         );
     }
 
+    /**
+     * Parses the task index from a user command.
+     *
+     * @param input: Full user input.
+     * @return Task index.
+     * @throws ChatbotException: If the index is missing, invalid, or out of range.
+     */
     private static int parseIndex(String input) throws ChatbotException {
         String[] parts = input.trim().split("\\s+");
         if (parts.length < 2) {
@@ -295,10 +392,23 @@ public class BryanChatbot {
         return zeroBasedIndex;
     }
 
+    /**
+     * Returns true if the given index is a valid task index.
+     *
+     * @param index: Task index.
+     * @return True if the index is within bounds.
+     */
     private static boolean isValidIndex(int index) {
         return index >= 0 && index < tasks.size();
     }
 
+    /**
+     * Extracts the text after a command keyword.
+     *
+     * @param input: Full user input.
+     * @param keyword: Command keyword.
+     * @return The text snippet after the keyword, or an empty string if absent.
+     */
     private static String extractAfterKeyword(String input, String keyword) {
         String prefix = keyword + " ";
         if (!input.startsWith(prefix)) {
@@ -307,6 +417,11 @@ public class BryanChatbot {
         return input.substring(prefix.length()).trim();
     }
 
+    /**
+     * Loads tasks from the save file into memory.
+     *
+     * @throws ChatbotException: If reading the file fails.
+     */
     private static void loadTasks() throws ChatbotException {
         if (!Files.exists(DATA_FILE)) {
             return;
@@ -325,6 +440,11 @@ public class BryanChatbot {
         }
     }
 
+    /**
+     * Saves all tasks to the save file.
+     *
+     * @throws ChatbotException: If writing the file fails.
+     */
     private static void saveTasks() throws ChatbotException {
         try {
             Files.createDirectories(DATA_DIR);
@@ -341,6 +461,12 @@ public class BryanChatbot {
         }
     }
 
+    /**
+     * Converts one line from the save file into a Task object.
+     *
+     * @param line: One line from the save file.
+     * @return Parsed task, or null if the line is invalid.
+     */
     private static Task parseTaskLine(String line) {
         String trimmedLine = line.trim();
         if (trimmedLine.isEmpty()) {
@@ -365,11 +491,7 @@ public class BryanChatbot {
             if (fields.length < 4) {
                 return null;
             }
-            try {
-                task = new Deadline(description, LocalDate.parse(fields[3]));
-            } catch (DateTimeParseException e) {
-                return null;
-            }
+            task = new Deadline(description, fields[3]);
             break;
         case "E":
             if (fields.length < 5) {
