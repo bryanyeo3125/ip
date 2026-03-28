@@ -3,7 +3,7 @@ package chatbot;
 /**
  * Represents a generic task in the chatbot.
  */
-abstract class Task {
+public abstract class Task {
 
     private final String description;
     private boolean isDone;
@@ -11,7 +11,7 @@ abstract class Task {
     /**
      * Constructs a task with a description.
      *
-     * @param description: Description of the task.
+     * @param description Description of the task.
      */
     protected Task(String description) {
         this.description = description;

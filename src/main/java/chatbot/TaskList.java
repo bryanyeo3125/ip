@@ -19,7 +19,7 @@ public class TaskList {
     /**
      * Adds a task to the list.
      *
-     * @param task: Task to be added.
+     * @param task Task to be added.
      */
     public void addTask(Task task) {
         tasks.add(task);
@@ -28,7 +28,7 @@ public class TaskList {
     /**
      * Deletes and returns the task at an index.
      *
-     * @param index: Index of the task.
+     * @param index Index of the task.
      * @return The deleted task.
      */
     public Task deleteTask(int index) {
@@ -50,7 +50,7 @@ public class TaskList {
     /**
      * Marks the task at an index as not done.
      *
-     * @param index: Index of the task.
+     * @param index Index of the task.
      * @return The updated task.
      */
     public Task unmarkTask(int index) {
@@ -62,7 +62,7 @@ public class TaskList {
     /**
      * Returns the task at an index.
      *
-     * @param index: Index of the task.
+     * @param index Index of the task.
      * @return Task at the specified index.
      */
     public Task getTask(int index) {
@@ -90,7 +90,7 @@ public class TaskList {
     /**
      * Searches the task list for tasks in which the descriptions contain a keyword.
      *
-     * @param keyword: The keyword used to search for matching tasks.
+     * @param keyword The keyword used to search for matching tasks.
      * @return A list of tasks whose descriptions contain the keyword.
      */
     public List<Task> findTasks(String keyword) {

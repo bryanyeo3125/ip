@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
  * The deadline is stored as a {@link LocalDate} and displayed in as
  * (MMM-D-YYYY).
  */
-class Deadline extends Task {
+public class Deadline extends Task {
 
     /** Formatter used to display the deadline date in a readable format. */
     private static final DateTimeFormatter OUTPUT_FORMAT =
@@ -20,8 +20,8 @@ class Deadline extends Task {
     /**
      * Constructs a deadline task with a description and due date.
      *
-     * @param description: Description of the task.
-     * @param by: The deadline by which the task must be completed.
+     * @param description Description of the task.
+     * @param by The deadline by which the task must be completed.
      */
     public Deadline(String description, LocalDate by) {
         super(description);
